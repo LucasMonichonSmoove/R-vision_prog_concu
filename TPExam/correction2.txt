@@ -1,0 +1,397 @@
+Question 1 : Quelles sont les affirmations vraies concernant cette instruction: int val = dup2(tube[0],0);
+Veuillez choisir au moins une réponse.
+	a. dup2 inverse les fichiers pointés par les descripteurs de fichier. tube[0] pointe vers l'entrée standard et 0 pointe sur la sortie du tube
+	b. cette instruction contient une erreur
+	c. dup2 ferme automatiquement le fichier pointé par 0
+	d. dup2 copie la valeur 0 dans la variable tube[0]
+	e. dup2 ferme automatiquement le fichier pointé par tube[0]
+	f. dup2 renvoie tube[0] en cas de succès
+	g. tube[0] et 0 pointent sur le même fichier après cette instruction
+	
+La fonction dup2(oldfd, newfd) copie le descripteur de fichier oldfd vers newfd, en fermant automatiquement newfd s'il était déjà ouvert.
+
+Analysons chaque affirmation :
+
+a. ❌ Faux. dup2 ne "renverse" pas les fichiers pointés. Il redirige newfd (ici 0, qui correspond à stdin) vers oldfd (tube[0]). Après l'exécution, tube[0] et 0 désigneront le même fichier.
+
+b. ❌ Faux. Il n'y a pas d'erreur syntaxique ou logique dans l'instruction.
+
+c. ✅ Vrai. dup2 ferme automatiquement newfd (0, soit stdin) s'il était ouvert avant d'effectuer la redirection.
+
+d. ❌ Faux. dup2 ne modifie pas la valeur de tube[0], il redirige simplement 0 vers tube[0].
+
+e. ❌ Faux. dup2 ne ferme pas tube[0]. Il ferme uniquement newfd s'il était ouvert avant la duplication.
+
+f. ✅ Vrai. dup2 retourne newfd en cas de succès, donc ici, il renverra 0.
+
+g. ✅ Vrai. Après l'exécution de dup2(tube[0], 0);, tube[0] et 0 (stdin) pointeront vers le même fichier.
+
+
+=====================================================================
+=====================================================================
+=====================================================================
+
+
+Question 2 : L'implémentation de la commande suivante nécessite l'utilisation de 4 tubes.
+
+cut -f 1,3 -d : < /etc/passwd | sed 's+^\(.*\):\(.*\)+\2:\1+' | sort -n > users
+
+Veuillez choisir une réponse.
+Vrai
+Faux 
+
+
+Analyse des tubes :
+Chaque | (pipe) entre les commandes implique l'utilisation d'un tube pour connecter la sortie standard d'une commande à l'entrée standard de la suivante.
+Ici, il y a deux |, donc deux tubes.
+La redirection > ne nécessite pas de tube supplémentaire, elle redirige simplement la sortie standard vers un fichier.
+Conclusion : L'affirmation est fausse, car seulement 2 tubes sont nécessaires, et non 4.
+
+Réponse correcte : Faux ❌
+
+=====================================================================
+=====================================================================
+=====================================================================
+
+Question 3 : L'opération P est bloquante lorsque le nombre de jetons dans le semaphore est de 0.
+Veuillez choisir une réponse.
+Vrai
+Faux
+
+
+Si le sémaphore est strictement positif, l'opération P diminue le compteur et le processus continue.
+Si le sémaphore est à 0, l'opération P est bloquante : le processus est mis en attente jusqu'à ce qu'un autre processus effectue une opération V (verhogen, "augmenter"), qui incrémente le sémaphore et libère un jeton.
+Donc, l'affirmation est vraie.
+
+Réponse correcte : ✅ Vrai.
+
+=====================================================================
+=====================================================================
+=====================================================================
+
+
+Question 4 : Combien de processus (père compris) sont créés par ce programme?
+
+int main() {
+    int pid1 , pid2 ;
+    pid1 = fork() ;
+    pid2 = fork() ;
+    if ( (pid1 != 0) && (pid2 == 0) )
+    {
+        fork() ;
+    }
+    fork() ;
+    return 0;
+}
+
+------
+if ((pid1 != 0) && (pid2 == 0)) {
+    fork();
+}
+Cette condition signifie que seul le processus dont pid1 est différent de 0 (donc le père du premier fork()) 
+et dont pid2 == 0 (donc un enfant du deuxième fork()) exécute ce fork().
+
+Le programme crée 9 nouveaux processus en plus du processus initial.
+
+Réponse correcte : 10 processus (père compris)
+
+
+
+=====================================================================
+=====================================================================
+=====================================================================
+
+Question 5 : Que se passe-t-il si l'on écrit dans un tube dont la sortie est fermée ?
+Veuillez choisir une réponse.
+	a. Rien.
+	b. L'instruction est ignorée et l'exécution continue.
+	c. Le processus reçoit le signal SIGPIPE.
+	d. Les données sont écrites quand même, elles seront lus plus tard par un processus qui réouvrira le tube.
+
+
+Lorsqu'un processus écrit dans un tube (pipe) dont la sortie est fermée, le système génère une erreur. Plus précisément :
+
+Si aucun processus ne lit dans le tube (la sortie est fermée), l'écriture entraîne l'envoi du signal SIGPIPE au processus écrivain.
+Par défaut, SIGPIPE termine le processus à moins qu'il ne soit intercepté par un gestionnaire de signal (signal(SIGPIPE, handler)).
+Si l'écriture est réalisée avec write(), celle-ci échoue avec l'erreur EPIPE.
+Analysons les options :
+
+a. Rien. ❌ Faux → Le signal SIGPIPE est envoyé.
+b. L'instruction est ignorée et l'exécution continue. ❌ Faux → L'écriture échoue et SIGPIPE peut tuer le processus.
+c. Le processus reçoit le signal SIGPIPE. ✅ Vrai → Exact, le processus reçoit SIGPIPE et peut être terminé.
+d. Les données sont écrites quand même, elles seront lues plus tard. ❌ Faux → Une fois la sortie du tube fermée, il est impossible de lire ultérieurement les données.
+Réponse correcte : ✅ c. Le processus reçoit le signal SIGPIPE.
+
+=====================================================================
+=====================================================================
+=====================================================================
+
+Question 6 : A quoi correspond le dernier paramètre de la fonction pthread_create
+Veuillez choisir une réponse.
+	a. Il s'agit du pointeur sur les données que va recevoir le thread en argument
+	b. Il s'agit du pointeur de la fonction que le thread va exécuter
+	c. Il s'agit du pointeur de retour du thread, il permet de savoir si celui-ci s'est terminé normalement ou non
+	d. Il a toujours la valeur NULL, il est là pour indiquer la fin des arguments du thread
+
+
+La fonction pthread_create s’utilise comme suit :
+
+int pthread_create(pthread_t *thread, const pthread_attr_t *attr,
+                   void *(*start_routine)(void *), void *arg);
+
+Les paramètres sont :
+
+pthread_t *thread : Identifiant du thread créé.
+const pthread_attr_t *attr : Attributs du thread (peut être NULL).
+void *(*start_routine)(void *) : Fonction que le thread va exécuter.
+void *arg : Pointeur sur les données passées à la fonction du thread.
+
+Réponse correcte : ✅ a. Il s'agit du pointeur sur les données que va recevoir le thread en argument.
+
+=====================================================================
+=====================================================================
+=====================================================================
+
+Question 7 : Sélectionnez les affirmations justes
+Veuillez choisir au moins une réponse.
+	a. fork renvoie -1 en cas d'erreur
+	b. fork renvoie le pid du processus courant + 1 au processus père
+	c. fork renvoie 0 en cas de succès au processus fils
+	d. fork renvoie le pid du processus fils au processus père
+	e. fork renvoie 0 en cas de succès au processus père
+
+
+La valeur de retour de fork() permet de distinguer le père du fils :
+Dans le processus père, fork() retourne le PID du processus fils.
+Dans le processus fils, fork() retourne 0.
+En cas d'erreur, fork() retourne -1 et ne crée pas de processus.
+
+Vérification des affirmations :
+a. fork renvoie -1 en cas d'erreur. ✅ Vrai
+→ Si fork() échoue (par exemple, si le nombre maximal de processus est atteint), il retourne -1.
+
+b. fork renvoie le pid du processus courant + 1 au processus père. ❌ Faux
+→ fork() ne renvoie pas PID + 1. Il renvoie le PID réel du fils, qui n'a pas de lien direct avec le PID du père.
+
+c. fork renvoie 0 en cas de succès au processus fils. ✅ Vrai
+→ Dans le processus fils, la valeur de retour de fork() est 0, ce qui permet de différencier père et fils.
+
+d. fork renvoie le pid du processus fils au processus père. ✅ Vrai
+→ Le processus père reçoit comme valeur de retour le PID de son fils.
+
+e. fork renvoie 0 en cas de succès au processus père. ❌ Faux
+→ Le père ne reçoit jamais 0. Seul le fils reçoit 0.
+
+Réponses correctes :
+✅ a, c, d.
+
+=====================================================================
+=====================================================================
+=====================================================================
+
+Question 8 : L'instruction suivante: int fd = open("fichier",O_CREAT|O_TRUNC|O_WRONLY,0644);
+
+Quelles sont les affirmations vraies?
+Veuillez choisir au moins une réponse.
+	a. fd aura pour valeur -1 si le fichier existe déjà
+	b. Les droits sur le fichiers sont changé en rw-r--r-- si le fichier existe déjà
+	c. Le fichier est ouvert en lecture seulement
+	d. Le fichier est ouvert en écriture seulement
+	e. Le fichier est ouvert et l'écriture se fera a la fin du contenu existant
+	f. Si le fichier n'existe pas il est créé avec les droit rw-r--r--
+	g. le fichier est ouvert en lecture/écriture
+	h. Le fichier est ouvert et son contenu est effacé
+
+Décomposition des options utilisées :
+O_CREAT : Crée le fichier s’il n’existe pas.
+O_TRUNC : Si le fichier existe, son contenu est effacé.
+O_WRONLY : Ouvre le fichier en écriture uniquement.
+0644 : Définit les permissions du fichier (rw-r--r--), mais uniquement s'il est créé (ceci ne change pas les permissions d’un fichier existant).
+Vérification des affirmations :
+a. fd aura pour valeur -1 si le fichier existe déjà. ❌ Faux
+→ O_CREAT ne provoque pas d’échec si le fichier existe. Il serait à -1 uniquement si l’ouverture échoue (ex. permissions insuffisantes).
+
+b. Les droits sur le fichier sont changés en rw-r--r-- si le fichier existe déjà. ❌ Faux
+→ Les permissions ne sont appliquées que lors de la création. Un fichier existant garde ses permissions actuelles.
+
+c. Le fichier est ouvert en lecture seulement. ❌ Faux
+→ O_WRONLY signifie écriture uniquement, pas lecture.
+
+d. Le fichier est ouvert en écriture seulement. ✅ Vrai
+→ O_WRONLY ouvre le fichier exclusivement en écriture.
+
+e. Le fichier est ouvert et l'écriture se fera à la fin du contenu existant. ❌ Faux
+→ O_TRUNC efface le contenu existant, donc l’écriture commence à zéro.
+
+f. Si le fichier n'existe pas, il est créé avec les droits rw-r--r--. ✅ Vrai
+→ O_CREAT crée le fichier avec 0644 (rw-r--r--).
+
+g. Le fichier est ouvert en lecture/écriture. ❌ Faux
+→ O_WRONLY signifie écriture uniquement, pas lecture/écriture (O_RDWR aurait été nécessaire).
+
+h. Le fichier est ouvert et son contenu est effacé. ✅ Vrai
+→ O_TRUNC efface le contenu existant du fichier.
+
+Réponses correctes : ✅ d, f, h.
+
+
+=====================================================================
+=====================================================================
+=====================================================================
+
+Question 9 : L'implémentation d'un buffer circulaire en multiprocess/multithread ne nécessite aucun semaphore.
+Veuillez choisir une réponse.
+Vrai
+Faux 
+
+Problème d’exclusion mutuelle
+
+Un thread/process peut être en train d’écrire pendant qu’un autre lit.
+Un autre processus ne doit pas modifier une donnée pendant qu’elle est en train d’être lue.
+Solution : Un sémaphore ou un mutex protège les accès concurrents.
+Problème de producteur/consommateur
+
+Un producteur écrit dans le buffer, mais ne doit pas écrire si le buffer est plein.
+Un consommateur lit du buffer, mais ne doit pas lire si le buffer est vide.
+Solution : Deux sémaphores (un pour les places libres, un pour les éléments disponibles).
+
+L’implémentation nécessite donc l’utilisation de sémaphores, mutex ou autre mécanisme de synchronisation pour éviter les accès concurrents et les conflits.
+
+Réponse correcte : ❌ Faux.
+
+
+=====================================================================
+=====================================================================
+=====================================================================
+
+Question 10 : Après un appel à fork, le processus père et son fils possèdent le même espace mémoire leur permettant d'échanger des données.
+Veuillez choisir une réponse.
+Vrai
+Faux 
+
+
+Pourquoi l'affirmation est fausse ?
+fork() crée un nouveau processus indépendant, qui copie la mémoire du père (Copy-On-Write dans les systèmes modernes).
+Toute modification de la mémoire après le fork n’est pas partagée : chaque processus a sa propre copie.
+Les données ne sont donc pas automatiquement partagées entre le père et le fils après fork().
+
+Pour échanger des données entre eux, il faut utiliser :
+Pipes (pipe())
+Mémoire partagée (shmget, mmap)
+Sockets
+Fichiers
+
+Conclusion
+Le père et le fils ne partagent pas la même mémoire après fork(). Chaque modification se fait dans un espace mémoire distinct.
+
+Réponse correcte : ❌ Faux.
+
+=====================================================================
+=====================================================================
+=====================================================================
+
+Question 11 : Écrivez un programme (convert) qui prend des chemins vers des fichiers en argument (argv) et qui les converti au format png dans le dossier de sortie (sortie (dossier pré-existant)) à l'aide du programme mogrify. Le nombre de processus de conversion fonctionnant en simultanés ne doit pas excéder huit. Le programme doit seulement afficher le nom des fichiers ayant réussi et ceux pour lequel cela a échoué. Pour vos tests, l'archive suivante: data.tar.gz peut vous être utile. Elle contient 40 fichiers image et quelques fichiers texte.
+
+Aide:
+
+La commande suivante convertit un fichier au format png dans le dossier de sortie en le nommant en fonction du nom d'origine. 1.jpg => 1.png
+
+mogrify -format png -path sortie images/1.jpg
+
+COde de correction : 
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/wait.h>
+#include "dijkstra.h"
+
+#define MAX_PROCESSES 8
+#define OUTPUT_DIR "sortie"
+#define SEM_KEY 1234  // Clé fixe pour le sémaphore
+
+void convert_file(const char *file) {
+    execlp("mogrify", "mogrify", "-format", "png", "-path", OUTPUT_DIR, file, (char *)NULL);
+    perror("execlp");
+    V(semid);  // Libérer la place SEULEMENT si execlp échoue
+    exit(EXIT_FAILURE);
+}
+
+int main(int argc, char *argv[]) {
+    if (argc < 2) {
+        fprintf(stderr, "Usage: %s <file1> <file2> ...\n", argv[0]);
+        return EXIT_FAILURE;
+    }
+
+    int semid = sem_create(SEM_KEY, MAX_PROCESSES);
+    if (semid == -1) {
+        perror("sem_create");
+        return EXIT_FAILURE;
+    }
+
+    for (int i = 1; i < argc; i++) {
+        P(semid);
+        pid_t pid = fork();
+        if (pid < 0) {
+            perror("fork");
+            V(semid);
+            continue;
+        }
+        if (pid == 0) {
+            convert_file(argv[i]);
+        }
+    }
+
+    while (wait(NULL) > 0);
+
+    sem_delete(semid);
+    return EXIT_SUCCESS;
+}
+
+
+exemple d'exécution:
+
+./convert images/*
+convert images/11.jpg success
+convert images/15.jpg success
+convert images/17.jpg success
+convert images/13.jpg success
+convert images/14.jpg success
+convert images/10.jpg success
+convert images/16.jpg success
+convert images/12.jpg success
+convert images/21.jpg success
+convert images/1.jpg success
+convert images/18.jpg success
+convert images/19.jpg success
+convert images/20.jpg success
+convert images/24.jpg success
+convert images/22.jpg success
+convert images/27.jpg success
+convert images/26.jpg success
+convert images/23.jpg success
+convert images/30.jpg success
+convert images/25.jpg success
+convert images/28.jpg success
+convert images/29.jpg success
+convert images/2.jpg success
+convert images/OTHER_ERROR.txt error
+convert images/37.jpg success
+convert images/PROBLEM.txt error
+convert images/35.jpg success
+convert images/31.jpg success
+convert images/33.jpg success
+convert images/34.jpg success
+convert images/32.jpg success
+convert images/3.jpg success
+convert images/36.jpg success
+convert images/6.jpg success
+convert images/5.jpg success
+convert images/INFO.txt error
+convert images/40.jpg success
+convert images/39.jpg success
+convert images/4.jpg success
+convert images/8.jpg success
+convert images/7.jpg success
+convert images/9.jpg success
+convert images/38.jpg success
