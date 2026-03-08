@@ -6,3 +6,5 @@
 - 4 sujets des années précédentes, TPExam ou DS corrigés avec codes correspondants dans le dossier TPExam
 - Mémos sur les différents cas vus dans les TPS, particulièrement sur les pipes et la mémoire partagée
 - Notes de cours empruntées gentiment à ce roi de Mathis BOZON
+- sujet de crtl tp et ds donnés comme annale
+- Ajout squelette universel pour énoncé pour pools threads avec compteur partagé (accélération du traitement de plusieurs travaux indépendants)
